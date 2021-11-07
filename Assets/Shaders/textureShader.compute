@@ -1,0 +1,67 @@
+﻿#pragma kernel Main
+
+RWTexture2D<float4> tex2d;
+Texture2D<float4> cmap;
+RWStructuredBuffer<float> _data;
+
+int r, b, type;
+float _dmin, _dmax;
+
+float invLerp(float from, float to, float value){
+  return (value - from) / (to - from);
+}
+
+uint2 getTextureProperties(Texture2D<float4> _tex){
+    uint len;
+    uint stride;
+    _tex.GetDimensions(len, stride);
+
+    return uint2(len,stride);
+}
+
+uint2 getRWTextureProperties(RWTexture2D<float4> _tex){
+    uint len;
+    uint stride;
+    _tex.GetDimensions(len, stride);
+
+    return uint2(len,stride);
+}
+
+uint2 getBufferProperties(StructuredBuffer<float> _buff){
+    uint len;
+    uint stride;
+    _buff.GetDimensions(len, stride);
+
+    return uint2(len,stride);
+}
+
+uint2 getRWBufferProperties(RWStructuredBuffer<float> _buff){
+    uint len;
+    uint stride;
+    _buff.GetDimensions(len, stride);
+
+    return uint2(len,stride);
+}
+
+float3 colored(float v){
+    float3 col = float3(0.0,0.0,0.0);
+    float3 gray = float3(0.2,0.2,0.2);
+
+    int cmap_len = getTextureProperties(cmap).x;
+    int v_index = v*cmap_len;
+    
+    col = cmap[int2(v_index,0)].rgb;
+    if(v < 0.01) col = gray;
+
+    return col;
+}
+
+[numthreads(1,1,1)]
+void Main (uint3 id : SV_DispatchThreadID)
+{
+    int index = id.y+id.x*b;
+    float value = invLerp(_dmin,_dmax,_data[index]);
+    float3 rgb = colored(value);
+
+    tex2d[id.xy] = float4(rgb,1.0);
+}
