@@ -23,7 +23,6 @@ public class DecodeData
   private const int SIXTEEN_BYTE_DIVIDER = 65536;
 
   public float[] values;
-  float[] azi;
 
   public DecodeData(string file)
   {
@@ -47,16 +46,11 @@ public class DecodeData
     min = float.Parse(xmlFile.SelectSingleNode(BlobXpath + "rawdata/@min").Value.Replace('.', ','));
     max = float.Parse(xmlFile.SelectSingleNode(BlobXpath + "rawdata/@max").Value.Replace('.', ','));
 
-    azi = DecompressData(azi_blobid, azi_depth);
+    angle = DecompressData(azi_blobid, azi_depth)[0];
+    angle = NormalizeAZI(azi_depth);
+
     values = DecompressData(z_blobid, z_depth);
-
-    if (azi.Length > 0) NormalizeAZI(azi_depth);
-    if (values.Length > 0)
-    {
-      NormalizeZ(z_depth, min, max);
-    }
-
-    angle = azi[0];
+    NormalizeZ(z_depth, min, max);
   }
 
   void NormalizeZ(int depth, float min, float max)
@@ -71,16 +65,10 @@ public class DecodeData
     }
   }
 
-  void NormalizeAZI(int depth)
+  float NormalizeAZI(int depth)
   {
     int divider = (depth == 8) ? EIGHT_BYTE_DIVIDER : SIXTEEN_BYTE_DIVIDER;
-
-    for (int i = 0; i < azi.Length; i++)
-    {
-      float value = azi[i];
-      value = (float)(value * rays / divider);
-      azi[i] = value;
-    }
+    return (float)(angle * rays / divider);
   }
 
 

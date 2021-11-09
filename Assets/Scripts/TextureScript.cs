@@ -48,7 +48,6 @@ public class TextureScript : MonoBehaviour
     FetchData fetchData = new FetchData($"ftp://daneradarowe.pl/{site}.vol/{scan}{type}.vol");
     string fetchedFile = fetchData.SendRequest();
     DecodeData decodeData = new DecodeData(fetchedFile);
-    Debug.Log(decodeData.angle);
     angle = decodeData.angle;
 
     if (decodeData.values.Length > 0) data.Add(decodeData.values);
