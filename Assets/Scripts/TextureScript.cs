@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
+using System.Linq;
+using System.Threading.Tasks;
 
 public class TextureScript : MonoBehaviour
 {
@@ -11,7 +12,7 @@ public class TextureScript : MonoBehaviour
   List<float[]> data = new List<float[]>();
   int datalen;
 
-  public List<int> rays; public List<int> bins;
+  public int rays; public int bins;
   List<float> dmin; List<float> dmax;
 
   [Range(0, 1)]
@@ -21,7 +22,11 @@ public class TextureScript : MonoBehaviour
 
   void Awake()
   {
-    GetData();
+    GetDataAsync();
+  }
+
+  void Start()
+  {
     SendToTextureArray();
   }
 
@@ -39,36 +44,42 @@ public class TextureScript : MonoBehaviour
     }
   }
 
-  void GetData()
+  void GetDataAsync()
   {
-    string site = "GDA_125_ZVW";
-    string scan = "2021110902241400";
-    string type = "dBZ";
+    string url = "ftp://daneradarowe.pl/";
+    SiteData siteData = new SiteData(url);
+    string[] sites = siteData.FetchSites().Split(';');
+    sites = sites.Take(sites.Count() - 1).ToArray();
+    string site = sites[1];
 
-    SiteData siteData = new SiteData("ftp://daneradarowe.pl/");
-    Debug.Log(siteData.sites);
-    FetchData fetchData = new FetchData($"ftp://daneradarowe.pl/{site}.vol/{scan}{type}.vol");
-    string fetchedFile = fetchData.SendRequest();
-    DecodeData decodeData = new DecodeData(fetchedFile);
-    angle = decodeData.angle;
+    string[] scans = siteData.FetchScans(site).Split(';');
+    scans = scans.Take(scans.Count() - 1).ToArray();
 
-    if (decodeData.values.Length > 0) data.Add(decodeData.values);
+    string fetchedZ = siteData.FetchData(site, scans[scans.Length - 1]);
+    string fetchedV = siteData.FetchData(site, scans[scans.Length - 2]);
+
+    DecodeData decodeZ = new DecodeData(fetchedZ);
+    DecodeData decodeV = new DecodeData(fetchedV);
+    angle = decodeZ.angle;
+
+    if (decodeZ.values.Length > 0) data.Add(decodeZ.values);
+    if (decodeV.values.Length > 0) data.Add(decodeV.values);
     datalen = data.Count;
 
-    rays = new List<int>(); bins = new List<int>();
     dmin = new List<float>(); dmax = new List<float>();
 
-    rays.Add(decodeData.rays);
-    bins.Add(decodeData.bins);
-    dmin.Add(decodeData.min);
-    dmax.Add(decodeData.max);
+    rays = decodeZ.rays;
+    bins = decodeZ.bins;
+
+    dmin.Add(decodeZ.min); dmin.Add(decodeV.min);
+    dmax.Add(decodeZ.max); dmax.Add(decodeV.max);
   }
 
   RenderTexture GenerateTexture(int index)
   {
     if (textureShader != null)
     {
-      RenderTexture rt = new RenderTexture(rays[index], bins[index], 0);
+      RenderTexture rt = new RenderTexture(rays, bins, 0);
       rt.enableRandomWrite = true;
       rt.filterMode = FilterMode.Point;
       rt.anisoLevel = 0;
@@ -82,14 +93,14 @@ public class TextureScript : MonoBehaviour
       dataBuffer.SetData(data[index]);
       textureShader.SetBuffer(karnel, "_data", dataBuffer);
 
-      textureShader.SetInt("rays", rays[index]);
-      textureShader.SetInt("bins", bins[index]);
+      textureShader.SetInt("rays", rays);
+      textureShader.SetInt("bins", bins);
       textureShader.SetInt("type", index);
 
       textureShader.SetFloat("_dmin", dmin[index]);
       textureShader.SetFloat("_dmax", dmax[index]);
 
-      textureShader.Dispatch(karnel, rays[index], bins[index], 1);
+      textureShader.Dispatch(karnel, rays, bins, 1);
       dataBuffer.Release();
 
       return rt;

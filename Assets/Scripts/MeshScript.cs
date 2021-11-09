@@ -18,8 +18,8 @@ public class MeshScript : MonoBehaviour
     var TexScript = this.GetComponent<TextureScript>();
     if (TexScript != null)
     {
-      if (TexScript.rays != null && TexScript.rays[0] != 0) rays = TexScript.rays[0];
-      if (TexScript.bins != null && TexScript.bins[0] != 0) bins = TexScript.bins[0];
+      if (TexScript.rays > 0) rays = TexScript.rays;
+      if (TexScript.bins > 0) bins = TexScript.bins;
     }
 
     GameObject go = new GameObject("RadarMesh");
