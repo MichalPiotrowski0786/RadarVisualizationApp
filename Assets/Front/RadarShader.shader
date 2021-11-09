@@ -40,7 +40,6 @@ Shader "Unlit/RadarShader"
 
             fixed4 frag (v2f i) : SV_Target
             {
-                i.uv.x = 1.0-i.uv.x;
                 fixed4 col = tex2D(_MainTex, i.uv);
                 return col;
             }

@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using System.Text;
 
 public class FetchData
 {
@@ -18,6 +19,7 @@ public class FetchData
     {
       using (WebClient client = new WebClient())
       {
+        client.Encoding = Encoding.GetEncoding("ISO-8859-1");
         try
         {
           file = client.DownloadString(url);

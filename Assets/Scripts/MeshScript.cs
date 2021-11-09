@@ -5,7 +5,7 @@ public class MeshScript : MonoBehaviour
   public Material material;
   public Mesh mesh;
 
-  int rays = 360;
+  int rays = 361;
   int bins = 250;
 
   void Start()
@@ -23,7 +23,8 @@ public class MeshScript : MonoBehaviour
     }
 
     GameObject go = new GameObject("RadarMesh");
-    go.transform.Rotate(new Vector3(-90f, -90f, 90f), Space.World);
+    float angle = TexScript.angle - 180f;
+    go.transform.Rotate(new Vector3(angle, 90f, -90f));
     mesh = new Mesh();
     mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
     mesh.Clear();

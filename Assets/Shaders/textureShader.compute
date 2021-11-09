@@ -4,7 +4,7 @@ RWTexture2D<float4> tex2d;
 Texture2D<float4> cmap;
 RWStructuredBuffer<float> _data;
 
-int r, b, type;
+int rays, bins, type;
 float _dmin, _dmax;
 
 float invLerp(float from, float to, float value){
@@ -59,9 +59,9 @@ float3 colored(float v){
 [numthreads(1,1,1)]
 void Main (uint3 id : SV_DispatchThreadID)
 {
-    int index = id.y+id.x*b;
+    int index = id.y+(rays-id.x)*bins;
     float value = invLerp(_dmin,_dmax,_data[index]);
     float3 rgb = colored(value);
-
+    
     tex2d[id.xy] = float4(rgb,1.0);
 }
