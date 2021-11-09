@@ -45,6 +45,8 @@ public class TextureScript : MonoBehaviour
     string scan = "2021110902241400";
     string type = "dBZ";
 
+    SiteData siteData = new SiteData("ftp://daneradarowe.pl/");
+    Debug.Log(siteData.sites);
     FetchData fetchData = new FetchData($"ftp://daneradarowe.pl/{site}.vol/{scan}{type}.vol");
     string fetchedFile = fetchData.SendRequest();
     DecodeData decodeData = new DecodeData(fetchedFile);

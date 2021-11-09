@@ -15,23 +15,37 @@ public class SiteData
 
   public string FetchSites()
   {
-    string file = null;
+    string res = null;
 
     if (url.Length > 0 && url != null)
     {
-      using (WebClient client = new WebClient())
+      try
       {
-        try
+        FtpWebRequest request = (FtpWebRequest)WebRequest.Create(url);
+        request.Method = WebRequestMethods.Ftp.ListDirectory;
+
+        var response = (FtpWebResponse)request.GetResponse();
+        if (response.StatusCode == FtpStatusCode.OpeningData)
         {
-          file = client.DownloadString(url);
+          Stream responseStream = response.GetResponseStream();
+          StreamReader reader = new StreamReader(responseStream);
+
+          while (reader.Peek() > 0)
+          {
+            string line = reader.ReadLine();
+            if (line.Contains("125")) res += $"{line};";
+          }
+
+          reader.Close();
+          response.Close();
         }
-        catch (Exception e)
-        {
-          throw e;
-        }
+      }
+      catch (Exception e)
+      {
+        throw e;
       }
     }
 
-    return file;
+    return res;
   }
 }
