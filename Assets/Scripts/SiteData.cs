@@ -2,96 +2,45 @@ using System;
 using System.IO;
 using System.Net;
 using System.Text;
+using FluentFTP;
 
 public class SiteData
 {
+  FtpClient client;
   string url;
 
   public SiteData(string url)
   {
     this.url = url;
+
+    client = new FtpClient(url);
+    client.AutoConnect();
   }
 
   public string FetchSites()
   {
     string res = null;
-
-    if (url.Length > 0 && url != null)
+    foreach (FtpListItem item in client.GetListing())
     {
-      try
-      {
-        FtpWebRequest request = (FtpWebRequest)WebRequest.Create(url);
-        request.Method = WebRequestMethods.Ftp.ListDirectory;
-        request.KeepAlive = false;
-        request.UsePassive = false;
-
-        var response = (FtpWebResponse)request.GetResponse();
-        if (response.StatusCode == FtpStatusCode.OpeningData)
-        {
-          Stream responseStream = response.GetResponseStream();
-          StreamReader reader = new StreamReader(responseStream);
-
-          while (reader.Peek() > 0)
-          {
-            string line = reader.ReadLine();
-            if (line.Contains("125")) res += $"{line};";
-          }
-
-          reader.Close();
-          response.Close();
-        }
-      }
-      catch (Exception e)
-      {
-        throw e;
-      }
+      if (item.FullName.Contains("125")) res += $"{item.FullName};";
     }
-
     return res;
   }
 
   public string FetchScans(string site)
   {
+    // LONGEST TASK, TRY REFACTORING
     string res = null;
-
-    if (url.Length > 0 && url != null)
+    foreach (FtpListItem item in client.GetListing(site))
     {
-      try
-      {
-        FtpWebRequest request = (FtpWebRequest)WebRequest.Create($"{url}{site}/");
-        request.Method = WebRequestMethods.Ftp.ListDirectory;
-        request.KeepAlive = false;
-        request.UsePassive = false;
-
-        var response = (FtpWebResponse)request.GetResponse();
-        if (response.StatusCode == FtpStatusCode.OpeningData)
-        {
-          Stream responseStream = response.GetResponseStream();
-          StreamReader reader = new StreamReader(responseStream);
-
-          while (reader.Peek() > 0)
-          {
-            string line = reader.ReadLine();
-            res += $"{line};";
-          }
-
-          reader.Close();
-          response.Close();
-        }
-      }
-      catch (Exception e)
-      {
-        throw e;
-      }
+      res += $"{item.FullName};";
     }
-
     return res;
   }
 
-  public string FetchData(string site, string scan)
+  public string FetchData(string scan)
   {
     string res = "";
-
     if (url.Length > 0 && url != null)
     {
       using (WebClient client = new WebClient())
@@ -99,7 +48,7 @@ public class SiteData
         client.Encoding = Encoding.GetEncoding("ISO-8859-1");
         try
         {
-          res = client.DownloadString($"{url}{site}/{scan}");
+          res = client.DownloadString($"{url}{scan}");
         }
         catch (Exception e)
         {
@@ -110,4 +59,6 @@ public class SiteData
 
     return res;
   }
+
+  public void CloseFTPConnection() { client.Disconnect(); }
 }

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-using System.Threading.Tasks;
+using System.IO;
 
 public class TextureScript : MonoBehaviour
 {
@@ -55,8 +55,10 @@ public class TextureScript : MonoBehaviour
     string[] scans = siteData.FetchScans(site).Split(';');
     scans = scans.Take(scans.Count() - 1).ToArray();
 
-    string fetchedZ = siteData.FetchData(site, scans[scans.Length - 1]);
-    string fetchedV = siteData.FetchData(site, scans[scans.Length - 2]);
+    string fetchedZ = siteData.FetchData(scans[scans.Length - 1]);
+    string fetchedV = siteData.FetchData(scans[scans.Length - 2]);
+
+    siteData.CloseFTPConnection();
 
     DecodeData decodeZ = new DecodeData(fetchedZ);
     DecodeData decodeV = new DecodeData(fetchedV);
