@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-using System.IO;
 
 public class TextureScript : MonoBehaviour
 {
@@ -22,7 +21,7 @@ public class TextureScript : MonoBehaviour
 
   void Awake()
   {
-    GetDataAsync();
+    GetData();
   }
 
   void Start()
@@ -44,16 +43,15 @@ public class TextureScript : MonoBehaviour
     }
   }
 
-  void GetDataAsync()
+  void GetData()
   {
     string url = "ftp://daneradarowe.pl/";
     SiteData siteData = new SiteData(url);
-    string[] sites = siteData.FetchSites().Split(';');
-    sites = sites.Take(sites.Count() - 1).ToArray();
+
+    string[] sites = siteData.FetchSites();
     string site = sites[1];
 
-    string[] scans = siteData.FetchScans(site).Split(';');
-    scans = scans.Take(scans.Count() - 1).ToArray();
+    string[] scans = siteData.FetchScans(site);
 
     string fetchedZ = siteData.FetchData(scans[scans.Length - 1]);
     string fetchedV = siteData.FetchData(scans[scans.Length - 2]);
@@ -111,5 +109,10 @@ public class TextureScript : MonoBehaviour
     {
       return null;
     }
+  }
+
+  void UpdateUI()
+  {
+
   }
 }

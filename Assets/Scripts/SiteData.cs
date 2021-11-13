@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -17,25 +18,31 @@ public class SiteData
     client.AutoConnect();
   }
 
-  public string FetchSites()
+  public string[] FetchSites()
   {
-    string res = null;
+    var list = client.GetListing();
+    List<string> res = new List<string>();
+
     foreach (FtpListItem item in client.GetListing())
     {
-      if (item.FullName.Contains("125")) res += $"{item.FullName};";
+      if (item.FullName.Contains("125")) res.Add(item.FullName);
     }
-    return res;
+
+    return res.ToArray();
   }
 
-  public string FetchScans(string site)
+  public string[] FetchScans(string site)
   {
     // LONGEST TASK, TRY REFACTORING
-    string res = null;
-    foreach (FtpListItem item in client.GetListing(site))
+    var list = client.GetListing(site);
+    List<string> res = new List<string>();
+
+    foreach (FtpListItem item in list)
     {
-      res += $"{item.FullName};";
+      res.Add(item.FullName);
     }
-    return res;
+
+    return res.ToArray();
   }
 
   public string FetchData(string scan)
