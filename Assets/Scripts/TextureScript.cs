@@ -50,7 +50,7 @@ public class TextureScript : MonoBehaviour
     SiteData siteData = new SiteData(url);
 
     string[] sites = siteData.FetchSites();
-    string site = sites[2];
+    string site = sites[1];
 
     string[] scans = siteData.FetchScans(site);
 
