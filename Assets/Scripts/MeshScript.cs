@@ -4,6 +4,8 @@ public class MeshScript : MonoBehaviour
 {
   public Material material;
   public Mesh mesh;
+  GameObject go;
+  TextureScript TexScript;
 
   int rays = 361;
   int bins = 250;
@@ -13,18 +15,22 @@ public class MeshScript : MonoBehaviour
     Generate();
   }
 
+  void Update()
+  {
+    Vector3 meshRotation = new Vector3(TexScript.angles[TexScript.datatype] - 180f, 90f, -90f);
+    go.transform.rotation = Quaternion.Euler(meshRotation.x, meshRotation.y, meshRotation.z);
+  }
+
   void Generate()
   {
-    var TexScript = this.GetComponent<TextureScript>();
+    TexScript = this.GetComponent<TextureScript>();
     if (TexScript != null)
     {
       if (TexScript.rays > 0) rays = TexScript.rays;
       if (TexScript.bins > 0) bins = TexScript.bins;
     }
 
-    GameObject go = new GameObject("RadarMesh");
-    float angle = TexScript.angle - 180f;
-    go.transform.Rotate(new Vector3(angle, 90f, -90f));
+    go = new GameObject("RadarMesh");
     mesh = new Mesh();
     mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
     mesh.Clear();

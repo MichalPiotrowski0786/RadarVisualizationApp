@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net;
 using System.Text;
 using FluentFTP;
@@ -34,6 +33,7 @@ public class SiteData
   public string[] FetchScans(string site)
   {
     // LONGEST TASK, TRY REFACTORING
+    // EDIT 13.11.2021: WAY BETTER PERFORMANCE NOW, BUT NOT IDEAL
     var list = client.GetListing(site);
     List<string> res = new List<string>();
 

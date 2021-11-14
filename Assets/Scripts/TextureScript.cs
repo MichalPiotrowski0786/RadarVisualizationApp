@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
+using UnityEngine.UI;
 
 public class TextureScript : MonoBehaviour
 {
   public RenderTexture[] RadarTexture;
   public Texture2D[] colormaps;
   public ComputeShader textureShader;
+  public Text infoText;
 
   List<float[]> data = new List<float[]>();
   int datalen;
@@ -17,7 +18,7 @@ public class TextureScript : MonoBehaviour
   [Range(0, 1)]
   public int datatype = 0;
 
-  public float angle;
+  public float[] angles;
 
   void Awake()
   {
@@ -49,18 +50,21 @@ public class TextureScript : MonoBehaviour
     SiteData siteData = new SiteData(url);
 
     string[] sites = siteData.FetchSites();
-    string site = sites[1];
+    string site = sites[2];
 
     string[] scans = siteData.FetchScans(site);
 
-    string fetchedZ = siteData.FetchData(scans[scans.Length - 1]);
-    string fetchedV = siteData.FetchData(scans[scans.Length - 2]);
+    string scanZ = scans[scans.Length - 1];
+    string scanV = scans[scans.Length - 2];
+
+    string fetchedZ = siteData.FetchData(scanZ);
+    string fetchedV = siteData.FetchData(scanV);
 
     siteData.CloseFTPConnection();
 
     DecodeData decodeZ = new DecodeData(fetchedZ);
     DecodeData decodeV = new DecodeData(fetchedV);
-    angle = decodeZ.angle;
+    angles = new float[] { decodeZ.angle, decodeV.angle };
 
     if (decodeZ.values.Length > 0) data.Add(decodeZ.values);
     if (decodeV.values.Length > 0) data.Add(decodeV.values);
@@ -73,6 +77,11 @@ public class TextureScript : MonoBehaviour
 
     dmin.Add(decodeZ.min); dmin.Add(decodeV.min);
     dmax.Add(decodeZ.max); dmax.Add(decodeV.max);
+
+    string infoString =
+    $" {decodeZ.siteName} {decodeZ.scanTime}z {decodeZ.scanDate}";
+
+    if (infoText != null) infoText.text = infoString;
   }
 
   RenderTexture GenerateTexture(int index)

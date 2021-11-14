@@ -2,9 +2,6 @@ using System.Xml;
 using System.IO;
 using System.Text;
 using Ionic.Zlib;
-using System.Collections.Generic;
-using System.Linq;
-using System;
 
 public class DecodeData
 {
@@ -18,6 +15,10 @@ public class DecodeData
   public int rays;
   public int bins;
   public float angle;
+
+  public string siteName = "";
+  public string scanDate = "";
+  public string scanTime = "";
 
   private const int EIGHT_BYTE_DIVIDER = 256;
   private const int SIXTEEN_BYTE_DIVIDER = 65536;
@@ -48,6 +49,12 @@ public class DecodeData
 
     angle = DecompressData(azi_blobid, azi_depth)[0];
     angle = NormalizeAZI(azi_depth);
+
+    //Info for UI
+    scanDate = xmlFile.SelectSingleNode("volume/scan/@date").Value;
+    scanTime = xmlFile.SelectSingleNode("volume/scan/@time").Value;
+    siteName = xmlFile.SelectSingleNode("volume/sensorinfo/@name").Value;
+    //!Info for UI
 
     values = DecompressData(z_blobid, z_depth);
     NormalizeZ(z_depth, min, max);
