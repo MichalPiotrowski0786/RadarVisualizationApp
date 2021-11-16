@@ -8,8 +8,9 @@ public class TextureScript : MonoBehaviour
   public Texture2D[] colormaps;
   public ComputeShader textureShader;
   public Text infoText;
+  public Dropdown sitesDropdown;
 
-  List<float[]> data = new List<float[]>();
+  List<float[]> data;
   int datalen;
 
   public int rays; public int bins;
@@ -20,19 +21,19 @@ public class TextureScript : MonoBehaviour
 
   public float[] angles;
 
-  void Awake()
-  {
-    GetData();
-  }
-
   void Start()
   {
-    SendToTextureArray();
+    GetData(0); // hardcoded start at Brzuchania, might refactor later
+    sitesDropdown.onValueChanged.AddListener(delegate
+    {
+      ClearData();
+      GetData(sitesDropdown.value);
+    });
   }
 
   void Update()
   {
-    GetComponent<MeshScript>().material.mainTexture = RadarTexture[datatype];
+    if (RadarTexture.Length > 0) GetComponent<MeshScript>().material.mainTexture = RadarTexture[datatype];
   }
 
   void SendToTextureArray()
@@ -44,13 +45,27 @@ public class TextureScript : MonoBehaviour
     }
   }
 
-  void GetData()
+  void ClearData()
   {
+    RadarTexture = null;
+    data = null;
+    datalen = 0;
+    rays *= 0;
+    bins *= 0;
+    dmin = null;
+    dmax = null;
+    angles = null;
+  }
+
+  void GetData(int siteIndex)
+  {
+    data = new List<float[]>();
+
     string url = "ftp://daneradarowe.pl/";
     SiteData siteData = new SiteData(url);
 
     string[] sites = siteData.FetchSites();
-    string site = sites[1];
+    string site = sites[siteIndex];
 
     string[] scans = siteData.FetchScans(site);
 
@@ -82,6 +97,8 @@ public class TextureScript : MonoBehaviour
     $" {decodeZ.siteName} {decodeZ.scanTime}z {decodeZ.scanDate}";
 
     if (infoText != null) infoText.text = infoString;
+
+    SendToTextureArray();
   }
 
   RenderTexture GenerateTexture(int index)
