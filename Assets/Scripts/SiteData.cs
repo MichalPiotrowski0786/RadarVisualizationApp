@@ -25,6 +25,7 @@ public class SiteData
     foreach (FtpListItem item in client.GetListing())
     {
       if (item.FullName.Contains("125")) res.Add(item.FullName);
+      //if (item.FullName.Contains("250")) res.Add(item.FullName); // surprisingly, it works so maybe use classic scans later
     }
 
     return res.ToArray();

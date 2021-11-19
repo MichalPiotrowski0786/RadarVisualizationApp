@@ -9,6 +9,9 @@ public class TextureScript : MonoBehaviour
   public ComputeShader textureShader;
   public Text infoText;
   public Dropdown sitesDropdown;
+  public Image loadingSpinner;
+  public Button zButton;
+  public Button vButton;
 
   List<float[]> data;
   int datalen;
@@ -16,17 +19,16 @@ public class TextureScript : MonoBehaviour
   public int rays; public int bins;
   List<float> dmin; List<float> dmax;
 
-  [Range(0, 1)]
   public int datatype = 0;
-
   public float[] angles;
 
   void Start()
   {
     GetData(0); // hardcoded start at Brzuchania, might refactor later
+    ButtonsLogic();
     sitesDropdown.onValueChanged.AddListener(delegate
     {
-      ClearData();
+      ClearMemory();
       GetData(sitesDropdown.value);
     });
   }
@@ -34,6 +36,23 @@ public class TextureScript : MonoBehaviour
   void Update()
   {
     if (RadarTexture.Length > 0) GetComponent<MeshScript>().material.mainTexture = RadarTexture[datatype];
+  }
+
+  void ButtonsLogic()
+  {
+    zButton.interactable = false;
+    zButton.onClick.AddListener(() =>
+    {
+      datatype = 0;
+      zButton.interactable = false;
+      vButton.interactable = true;
+    });
+    vButton.onClick.AddListener(() =>
+    {
+      datatype = 1;
+      zButton.interactable = true;
+      vButton.interactable = false;
+    });
   }
 
   void SendToTextureArray()
@@ -45,7 +64,7 @@ public class TextureScript : MonoBehaviour
     }
   }
 
-  void ClearData()
+  void ClearMemory()
   {
     RadarTexture = null;
     data = null;
@@ -76,6 +95,7 @@ public class TextureScript : MonoBehaviour
     string fetchedV = siteData.FetchData(scanV);
 
     siteData.CloseFTPConnection();
+    loadingSpinner.enabled = false;
 
     DecodeData decodeZ = new DecodeData(fetchedZ);
     DecodeData decodeV = new DecodeData(fetchedV);
@@ -94,7 +114,7 @@ public class TextureScript : MonoBehaviour
     dmax.Add(decodeZ.max); dmax.Add(decodeV.max);
 
     string infoString =
-    $" {decodeZ.siteName} {decodeZ.scanTime}z {decodeZ.scanDate}";
+    $"{decodeZ.siteName}\n{decodeZ.scanTime}z\n{decodeZ.scanDate}";
 
     if (infoText != null) infoText.text = infoString;
 
