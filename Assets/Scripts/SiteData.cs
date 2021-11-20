@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Text;
 using FluentFTP;
@@ -7,7 +7,7 @@ using FluentFTP;
 public class SiteData
 {
   FtpClient client;
-  string url;
+  public string url;
 
   public SiteData(string url)
   {
@@ -17,36 +17,26 @@ public class SiteData
     client.AutoConnect();
   }
 
-  public string[] FetchSites()
+  public string[] FetchSiteList()
   {
-    var list = client.GetListing();
-    List<string> res = new List<string>();
-
-    foreach (FtpListItem item in client.GetListing())
-    {
-      if (item.FullName.Contains("125")) res.Add(item.FullName);
-      //if (item.FullName.Contains("250")) res.Add(item.FullName); // surprisingly, it works so maybe use classic scans later
-    }
-
-    return res.ToArray();
+    return client.GetListing()
+      .Where((x) => x.FullName.Contains("125"))
+      .Select((x) => x.FullName)
+      .ToArray();
   }
 
-  public string[] FetchScans(string site)
+  public string[] FetchScanList(string site)
   {
     // LONGEST TASK, TRY REFACTORING
     // EDIT 13.11.2021: WAY BETTER PERFORMANCE NOW, BUT NOT IDEAL
-    var list = client.GetListing(site);
-    List<string> res = new List<string>();
+    // EDIT 20.11.2021: CHANGED TO LINQ QUERRY, SLIGHT IMPROVEMENT
 
-    foreach (FtpListItem item in list)
-    {
-      res.Add(item.FullName);
-    }
-
-    return res.ToArray();
+    return client.GetListing(site)
+      .Select((x) => x.Name.Substring(0, 16))
+      .ToArray();
   }
 
-  public string FetchData(string scan)
+  public string FetchScan(string scan)
   {
     string res = "";
     if (url.Length > 0 && url != null)

@@ -38,11 +38,11 @@ public class MeshScript : MonoBehaviour
     go.AddComponent<MeshFilter>().mesh = mesh;
     go.AddComponent<MeshRenderer>().material = material;
 
-    Vector3[] verts = new Vector3[(rays + 1) * (bins + 1)];
+    Vector3[] verts = new Vector3[(rays) * (bins + 1)];
     Vector2[] uvs = new Vector2[verts.Length];
     int[] tris = new int[verts.Length * 6];
 
-    for (int index = 0, i = 0; i < rays + 1; i++)
+    for (int index = 0, i = 0; i < rays; i++)
     {
       for (int j = 0; j < bins + 1; j++)
       {
@@ -58,7 +58,7 @@ public class MeshScript : MonoBehaviour
 
     int tri_index = 0;
     int vert_index = 0;
-    for (int i = 0; i < rays; i++)
+    for (int i = 0; i < rays - 1; i++)
     {
       for (int j = 0; j < bins; j++)
       {

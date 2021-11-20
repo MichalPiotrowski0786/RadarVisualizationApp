@@ -7,14 +7,17 @@ public class TextureScript : MonoBehaviour
   public RenderTexture[] RadarTexture;
   public Texture2D[] colormaps;
   public ComputeShader textureShader;
+
   public Text infoText;
+  public Text maxValueText;
+  public Text minValueText;
   public Dropdown sitesDropdown;
   public Image loadingSpinner;
-  public Button zButton;
-  public Button vButton;
+  public RawImage colormapImage;
+  public Button[] buttons;
 
   List<float[]> data;
-  int datalen;
+  int siteDatatypes;
 
   public int rays; public int bins;
   List<float> dmin; List<float> dmax;
@@ -25,12 +28,7 @@ public class TextureScript : MonoBehaviour
   void Start()
   {
     GetData(0); // hardcoded start at Brzuchania, might refactor later
-    ButtonsLogic();
-    sitesDropdown.onValueChanged.AddListener(delegate
-    {
-      ClearMemory();
-      GetData(sitesDropdown.value);
-    });
+    sitesDropdown.onValueChanged.AddListener(delegate { GetData(sitesDropdown.value); });
   }
 
   void Update()
@@ -40,84 +38,86 @@ public class TextureScript : MonoBehaviour
 
   void ButtonsLogic()
   {
-    zButton.interactable = false;
-    zButton.onClick.AddListener(() =>
+    if (buttons.Length > 0)
     {
-      datatype = 0;
-      zButton.interactable = false;
-      vButton.interactable = true;
-    });
-    vButton.onClick.AddListener(() =>
-    {
-      datatype = 1;
-      zButton.interactable = true;
-      vButton.interactable = false;
-    });
+      UpdateColormapImageTexture(datatype);
+      for (int i = 0; i < siteDatatypes; i++)
+      {
+        int x = i; // lol
+        buttons[i].interactable = true;
+        buttons[i].onClick.AddListener(() =>
+        {
+          datatype = x;
+          UpdateColormapImageTexture(x);
+        });
+      }
+    }
   }
 
   void SendToTextureArray()
   {
-    RadarTexture = new RenderTexture[datalen];
-    for (int i = 0; i < datalen; i++)
+    RadarTexture = new RenderTexture[siteDatatypes];
+
+    for (int i = 0; i < siteDatatypes; i++)
     {
       RadarTexture[i] = GenerateTexture(i);
     }
   }
 
-  void ClearMemory()
+  void UpdateColormapImageTexture(int index)
   {
-    RadarTexture = null;
-    data = null;
-    datalen = 0;
-    rays *= 0;
-    bins *= 0;
-    dmin = null;
-    dmax = null;
-    angles = null;
+    if (colormapImage != null)
+    {
+      colormapImage.texture = colormaps[index];
+      maxValueText.text = dmax[index].ToString().Replace(',', '.');
+      minValueText.text = dmin[index].ToString().Replace(',', '.');
+    }
   }
 
   void GetData(int siteIndex)
   {
-    data = new List<float[]>();
-
     string url = "ftp://daneradarowe.pl/";
     SiteData siteData = new SiteData(url);
 
-    string[] sites = siteData.FetchSites();
+    string[] sites = siteData.FetchSiteList();
     string site = sites[siteIndex];
+    string[] scans = siteData.FetchScanList(site);
 
-    string[] scans = siteData.FetchScans(site);
+    siteDatatypes = 2;
+    if (siteIndex == 3 || siteIndex == 5 || siteIndex == 6) siteDatatypes = 3;
+    string[] dataName = new string[3] { "dBZ", "V", "RhoHV" };
 
-    string scanZ = scans[scans.Length - 1];
-    string scanV = scans[scans.Length - 2];
+    RadarTexture = null;
+    data = new List<float[]>();
+    angles = new float[siteDatatypes];
+    dmin = new List<float>();
+    dmax = new List<float>();
 
-    string fetchedZ = siteData.FetchData(scanZ);
-    string fetchedV = siteData.FetchData(scanV);
+    for (int i = 0; i < siteDatatypes; i++)
+    {
+      string scanName = $"{site}/{scans[scans.Length - 1]}{dataName[i]}.vol";
+      string scan = siteData.FetchScan(scanName);
+
+      DecodeData decoded = new DecodeData(scan);
+      angles[i] = decoded.angle;
+
+      if (decoded.values.Length > 0) data.Add(decoded.values);
+      dmin.Add(decoded.min);
+      dmax.Add(decoded.max);
+
+      if (i == 0)
+      {
+        rays = decoded.rays - 1; // no idea why, but subtracting one from rays fixes mesh and texture problems
+        bins = decoded.bins;
+
+        string infoString = $"{decoded.siteName}\n{decoded.scanTime}z\n{decoded.scanDate}";
+        if (infoText != null) infoText.text = infoString;
+      }
+    }
 
     siteData.CloseFTPConnection();
-    loadingSpinner.enabled = false;
 
-    DecodeData decodeZ = new DecodeData(fetchedZ);
-    DecodeData decodeV = new DecodeData(fetchedV);
-    angles = new float[] { decodeZ.angle, decodeV.angle };
-
-    if (decodeZ.values.Length > 0) data.Add(decodeZ.values);
-    if (decodeV.values.Length > 0) data.Add(decodeV.values);
-    datalen = data.Count;
-
-    dmin = new List<float>(); dmax = new List<float>();
-
-    rays = decodeZ.rays;
-    bins = decodeZ.bins;
-
-    dmin.Add(decodeZ.min); dmin.Add(decodeV.min);
-    dmax.Add(decodeZ.max); dmax.Add(decodeV.max);
-
-    string infoString =
-    $"{decodeZ.siteName}\n{decodeZ.scanTime}z\n{decodeZ.scanDate}";
-
-    if (infoText != null) infoText.text = infoString;
-
+    ButtonsLogic();
     SendToTextureArray();
   }
 
@@ -126,6 +126,7 @@ public class TextureScript : MonoBehaviour
     if (textureShader != null)
     {
       RenderTexture rt = new RenderTexture(rays, bins, 0);
+      rt.format = RenderTextureFormat.ARGB32;
       rt.enableRandomWrite = true;
       rt.filterMode = FilterMode.Point;
       rt.anisoLevel = 0;
@@ -155,10 +156,5 @@ public class TextureScript : MonoBehaviour
     {
       return null;
     }
-  }
-
-  void UpdateUI()
-  {
-
   }
 }

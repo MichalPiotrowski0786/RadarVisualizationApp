@@ -43,15 +43,12 @@ uint2 getRWBufferProperties(RWStructuredBuffer<float> _buff){
     return uint2(len,stride);
 }
 
-float3 colored(float v){
-    float3 col = float3(0.0,0.0,0.0);
-    float3 gray = float3(0.2,0.2,0.2);
-
+float4 colored(float v){
     int cmap_len = getTextureProperties(cmap).x;
     int v_index = v*cmap_len;
     
-    col = cmap[int2(v_index,0)].rgb;
-    if(v < 0.01) col = gray;
+    float4 col = float4(cmap[int2(v_index,0)].rgb,0.8);
+    if(v < 0.01) col.a = 0.0;
 
     return col;
 }
@@ -61,7 +58,7 @@ void Main (uint3 id : SV_DispatchThreadID)
 {
     int index = id.y+(rays-id.x)*bins;
     float value = invLerp(_dmin,_dmax,_data[index]);
-    float3 rgb = colored(value);
+    float4 rgba = colored(value);
     
-    tex2d[id.xy] = float4(rgb,1.0);
+    tex2d[id.xy] = rgba;
 }
