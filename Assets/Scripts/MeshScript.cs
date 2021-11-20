@@ -5,9 +5,8 @@ public class MeshScript : MonoBehaviour
   public Material material;
   public Mesh mesh;
   GameObject go;
-  TextureScript TexScript;
 
-  int rays = 361;
+  int rays = 360;
   int bins = 250;
 
   void Start()
@@ -15,22 +14,11 @@ public class MeshScript : MonoBehaviour
     Generate();
   }
 
-  void Update()
-  {
-    Vector3 meshRotation = new Vector3(TexScript.angles[TexScript.datatype] - 180f, 90f, -90f);
-    go.transform.rotation = Quaternion.Euler(meshRotation.x, meshRotation.y, meshRotation.z);
-  }
-
   void Generate()
   {
-    TexScript = this.GetComponent<TextureScript>();
-    if (TexScript != null)
-    {
-      if (TexScript.rays > 0) rays = TexScript.rays;
-      if (TexScript.bins > 0) bins = TexScript.bins;
-    }
-
     go = new GameObject("RadarMesh");
+    go.transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
+
     mesh = new Mesh();
     mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
     mesh.Clear();
@@ -38,11 +26,11 @@ public class MeshScript : MonoBehaviour
     go.AddComponent<MeshFilter>().mesh = mesh;
     go.AddComponent<MeshRenderer>().material = material;
 
-    Vector3[] verts = new Vector3[(rays) * (bins + 1)];
+    Vector3[] verts = new Vector3[(rays + 1) * (bins + 1)];
     Vector2[] uvs = new Vector2[verts.Length];
     int[] tris = new int[verts.Length * 6];
 
-    for (int index = 0, i = 0; i < rays; i++)
+    for (int index = 0, i = 0; i < rays + 1; i++)
     {
       for (int j = 0; j < bins + 1; j++)
       {
@@ -58,7 +46,7 @@ public class MeshScript : MonoBehaviour
 
     int tri_index = 0;
     int vert_index = 0;
-    for (int i = 0; i < rays - 1; i++)
+    for (int i = 0; i < rays; i++)
     {
       for (int j = 0; j < bins; j++)
       {

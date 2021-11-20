@@ -4,43 +4,47 @@ using UnityEngine.UI;
 
 public class TextureScript : MonoBehaviour
 {
-  public RenderTexture[] RadarTexture;
+  public RenderTexture[] RadarTextures;
   public Texture2D[] colormaps;
   public ComputeShader textureShader;
 
   public Text infoText;
-  public Text maxValueText;
   public Text minValueText;
+  public Text maxValueText;
   public Dropdown sitesDropdown;
+  public Dropdown elevationsDropdown;
   public Image loadingSpinner;
   public RawImage colormapImage;
   public Button[] buttons;
 
-  List<float[]> data;
+  List<Scan> data;
   int siteDatatypes;
-
-  public int rays; public int bins;
-  List<float> dmin; List<float> dmax;
+  int elevations;
 
   public int datatype = 0;
-  public float[] angles;
+  public int elevation = 0;
+
+  private string[] _minValues = new string[3] { "-31.5", "-47.7", "0%" };
+  private string[] _maxValues = new string[3] { "95.5", "47.7", "100%" };
 
   void Start()
   {
     GetData(0); // hardcoded start at Brzuchania, might refactor later
-    sitesDropdown.onValueChanged.AddListener(delegate { GetData(sitesDropdown.value); });
+    sitesDropdown.onValueChanged.AddListener((x) => { GetData(x); });
+    elevationsDropdown.onValueChanged.AddListener((x) => { elevation = x; });
   }
 
   void Update()
   {
-    if (RadarTexture.Length > 0) GetComponent<MeshScript>().material.mainTexture = RadarTexture[datatype];
+    int radarTextureIndex = (datatype * elevations) + elevation;
+    if (RadarTextures.Length > 0) GetComponent<MeshScript>().material.mainTexture = RadarTextures[radarTextureIndex];
   }
 
   void ButtonsLogic()
   {
     if (buttons.Length > 0)
     {
-      UpdateColormapImageTexture(datatype);
+      UpdateColormapElement(datatype);
       for (int i = 0; i < siteDatatypes; i++)
       {
         int x = i; // lol
@@ -48,30 +52,17 @@ public class TextureScript : MonoBehaviour
         buttons[i].onClick.AddListener(() =>
         {
           datatype = x;
-          UpdateColormapImageTexture(x);
+          UpdateColormapElement(x);
         });
       }
     }
   }
 
-  void SendToTextureArray()
+  void UpdateColormapElement(int index)
   {
-    RadarTexture = new RenderTexture[siteDatatypes];
-
-    for (int i = 0; i < siteDatatypes; i++)
-    {
-      RadarTexture[i] = GenerateTexture(i);
-    }
-  }
-
-  void UpdateColormapImageTexture(int index)
-  {
-    if (colormapImage != null)
-    {
-      colormapImage.texture = colormaps[index];
-      maxValueText.text = dmax[index].ToString().Replace(',', '.');
-      minValueText.text = dmin[index].ToString().Replace(',', '.');
-    }
+    colormapImage.texture = colormaps[index];
+    minValueText.text = _minValues[index];
+    maxValueText.text = _maxValues[index];
   }
 
   void GetData(int siteIndex)
@@ -87,41 +78,44 @@ public class TextureScript : MonoBehaviour
     if (siteIndex == 3 || siteIndex == 5 || siteIndex == 6) siteDatatypes = 3;
     string[] dataName = new string[3] { "dBZ", "V", "RhoHV" };
 
-    RadarTexture = null;
-    data = new List<float[]>();
-    angles = new float[siteDatatypes];
-    dmin = new List<float>();
-    dmax = new List<float>();
+    elevationsDropdown.ClearOptions();
 
+    var RadarTexturesList = new List<RenderTexture>();
     for (int i = 0; i < siteDatatypes; i++)
     {
       string scanName = $"{site}/{scans[scans.Length - 1]}{dataName[i]}.vol";
       string scan = siteData.FetchScan(scanName);
 
-      DecodeData decoded = new DecodeData(scan);
-      angles[i] = decoded.angle;
-
-      if (decoded.values.Length > 0) data.Add(decoded.values);
-      dmin.Add(decoded.min);
-      dmax.Add(decoded.max);
+      DecodeData data = new DecodeData(scan);
+      elevations = data.len;
 
       if (i == 0)
       {
-        rays = decoded.rays - 1; // no idea why, but subtracting one from rays fixes mesh and texture problems
-        bins = decoded.bins;
-
-        string infoString = $"{decoded.siteName}\n{decoded.scanTime}z\n{decoded.scanDate}";
+        string infoString = $"{data.scan.name}\n{data.scan.time}z\n{data.scan.date}";
         if (infoText != null) infoText.text = infoString;
       }
+
+      foreach (Slice slice in data.scan.ReturnSliceArr())
+      {
+        RadarTexturesList.Add(GenerateTexture(i, slice.data, slice.rays, slice.bins, slice.max, slice.min));
+
+        if (i == 0)
+        {
+          var dropdownOption = new Dropdown.OptionData();
+          dropdownOption.text = $"{slice.elevation}°";
+          elevationsDropdown.options.Add(dropdownOption);
+        }
+      }
     }
-
     siteData.CloseFTPConnection();
+    elevationsDropdown.value = elevation;
+    elevationsDropdown.captionText.text = elevationsDropdown.options[elevation].text;
 
+    RadarTextures = RadarTexturesList.ToArray();
     ButtonsLogic();
-    SendToTextureArray();
   }
 
-  RenderTexture GenerateTexture(int index)
+  RenderTexture GenerateTexture(int index, float[] data, int rays, int bins, float max, float min)
   {
     if (textureShader != null)
     {
@@ -136,16 +130,16 @@ public class TextureScript : MonoBehaviour
       textureShader.SetTexture(karnel, "tex2d", rt);
       textureShader.SetTexture(karnel, "cmap", colormaps[index]);
 
-      ComputeBuffer dataBuffer = new ComputeBuffer(data[index].Length, sizeof(float));
-      dataBuffer.SetData(data[index]);
+      ComputeBuffer dataBuffer = new ComputeBuffer(data.Length, sizeof(float));
+      dataBuffer.SetData(data);
       textureShader.SetBuffer(karnel, "_data", dataBuffer);
 
       textureShader.SetInt("rays", rays);
       textureShader.SetInt("bins", bins);
       textureShader.SetInt("type", index);
 
-      textureShader.SetFloat("_dmin", dmin[index]);
-      textureShader.SetFloat("_dmax", dmax[index]);
+      textureShader.SetFloat("_dmin", min);
+      textureShader.SetFloat("_dmax", max);
 
       textureShader.Dispatch(karnel, rays, bins, 1);
       dataBuffer.Release();
