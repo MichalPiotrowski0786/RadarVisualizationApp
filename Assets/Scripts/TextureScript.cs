@@ -18,6 +18,7 @@ public class TextureScript : MonoBehaviour
   public Button[] buttons;
 
   List<Scan> data;
+  float[] anglesForCorrection;
   int siteDatatypes;
   int elevations;
 
@@ -30,8 +31,17 @@ public class TextureScript : MonoBehaviour
   void Start()
   {
     GetData(0); // hardcoded start at Brzuchania, might refactor later
-    sitesDropdown.onValueChanged.AddListener((x) => { GetData(x); });
-    elevationsDropdown.onValueChanged.AddListener((x) => { elevation = x; });
+    FixAngleOnMeshObject(0, 0);
+    sitesDropdown.onValueChanged.AddListener((x) =>
+    {
+      GetData(x);
+      FixAngleOnMeshObject(datatype, elevation);
+    });
+    elevationsDropdown.onValueChanged.AddListener((x) =>
+    {
+      elevation = x;
+      FixAngleOnMeshObject(datatype, x);
+    });
   }
 
   void Update()
@@ -44,6 +54,7 @@ public class TextureScript : MonoBehaviour
   {
     if (buttons.Length > 0)
     {
+      foreach (Button b in buttons) b.interactable = false;
       UpdateColormapElement(datatype);
       for (int i = 0; i < siteDatatypes; i++)
       {
@@ -53,6 +64,7 @@ public class TextureScript : MonoBehaviour
         {
           datatype = x;
           UpdateColormapElement(x);
+          FixAngleOnMeshObject(datatype, elevation);
         });
       }
     }
@@ -63,6 +75,18 @@ public class TextureScript : MonoBehaviour
     colormapImage.texture = colormaps[index];
     minValueText.text = _minValues[index];
     maxValueText.text = _maxValues[index];
+  }
+
+  void FixAngleOnMeshObject(int dataIndex, int elevIndex)
+  {
+    int index = (dataIndex * elevations) + elevIndex;
+    var radarMeshGameObject = GameObject.FindGameObjectWithTag("radar");
+
+    if (radarMeshGameObject != null)
+    {
+      Vector3 meshRotation = new Vector3(anglesForCorrection[index] - 180f, 90f, -90f);
+      radarMeshGameObject.transform.rotation = Quaternion.Euler(meshRotation.x, meshRotation.y, meshRotation.z);
+    }
   }
 
   void GetData(int siteIndex)
@@ -81,6 +105,7 @@ public class TextureScript : MonoBehaviour
     elevationsDropdown.ClearOptions();
 
     var RadarTexturesList = new List<RenderTexture>();
+    var anglesForCorrectionList = new List<float>();
     for (int i = 0; i < siteDatatypes; i++)
     {
       string scanName = $"{site}/{scans[scans.Length - 1]}{dataName[i]}.vol";
@@ -97,7 +122,8 @@ public class TextureScript : MonoBehaviour
 
       foreach (Slice slice in data.scan.ReturnSliceArr())
       {
-        RadarTexturesList.Add(GenerateTexture(i, slice.data, slice.rays, slice.bins, slice.max, slice.min));
+        RadarTexturesList.Add(GenerateTexture(i, slice.data, slice.rays - 1, slice.bins, slice.max, slice.min));
+        anglesForCorrectionList.Add(slice.angle);
 
         if (i == 0)
         {
@@ -108,6 +134,9 @@ public class TextureScript : MonoBehaviour
       }
     }
     siteData.CloseFTPConnection();
+
+    anglesForCorrection = anglesForCorrectionList.ToArray();
+
     elevationsDropdown.value = elevation;
     elevationsDropdown.captionText.text = elevationsDropdown.options[elevation].text;
 

@@ -18,6 +18,7 @@ public class MeshScript : MonoBehaviour
   {
     go = new GameObject("RadarMesh");
     go.transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
+    go.tag = "radar";
 
     mesh = new Mesh();
     mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
