@@ -110,6 +110,7 @@ public class TextureScript : MonoBehaviour
     {
       string scanName = $"{site}/{scans[scans.Length - 1]}{dataName[i]}.vol";
       string scan = siteData.FetchScan(scanName);
+      //string localScan = File.ReadAllText(@"C:\Users\MichalPiotrowski\Downloads\2021082315135300V.vol", Encoding.GetEncoding("ISO-8859-1"));
 
       DecodeData data = new DecodeData(scan);
       elevations = data.len;
