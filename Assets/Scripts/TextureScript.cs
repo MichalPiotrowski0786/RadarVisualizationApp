@@ -17,7 +17,7 @@ public class TextureScript : MonoBehaviour
   public RawImage colormapImage;
   public Button[] buttons;
 
-  List<Scan> data;
+  List<Scan> ScanList;
   float[] anglesForCorrection;
   int siteDatatypes;
   int elevations;
@@ -40,6 +40,7 @@ public class TextureScript : MonoBehaviour
     elevationsDropdown.onValueChanged.AddListener((x) =>
     {
       elevation = x;
+
       FixAngleOnMeshObject(datatype, x);
     });
   }
@@ -63,8 +64,10 @@ public class TextureScript : MonoBehaviour
         buttons[i].onClick.AddListener(() =>
         {
           datatype = x;
+
           UpdateColormapElement(x);
-          FixAngleOnMeshObject(datatype, elevation);
+          FixAngleOnMeshObject(x, elevation);
+          UpdateInfoText(x);
         });
       }
     }
@@ -89,6 +92,13 @@ public class TextureScript : MonoBehaviour
     }
   }
 
+  void UpdateInfoText(int siteIndex)
+  {
+    Debug.Log(siteIndex + "; " + ScanList.Count);
+    string infoString = $"{ScanList[siteIndex].name}\n{ScanList[siteIndex].time}z\n{ScanList[siteIndex].date}";
+    infoText.text = infoString;
+  }
+
   void GetData(int siteIndex)
   {
     string url = "ftp://daneradarowe.pl/";
@@ -104,6 +114,7 @@ public class TextureScript : MonoBehaviour
 
     elevationsDropdown.ClearOptions();
 
+    ScanList = new List<Scan>();
     var RadarTexturesList = new List<RenderTexture>();
     var anglesForCorrectionList = new List<float>();
     for (int i = 0; i < siteDatatypes; i++)
@@ -113,12 +124,13 @@ public class TextureScript : MonoBehaviour
       //string localScan = File.ReadAllText(@"C:\Users\MichalPiotrowski\Downloads\2021082315135300V.vol", Encoding.GetEncoding("ISO-8859-1"));
 
       DecodeData data = new DecodeData(scan);
+      ScanList.Add(data.scan);
       elevations = data.len;
 
       if (i == 0)
       {
         string infoString = $"{data.scan.name}\n{data.scan.time}z\n{data.scan.date}";
-        if (infoText != null) infoText.text = infoString;
+        infoText.text = infoString;
       }
 
       foreach (Slice slice in data.scan.ReturnSliceArr())
