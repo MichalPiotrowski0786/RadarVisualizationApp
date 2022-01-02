@@ -42,6 +42,11 @@ public class DecodeData
     for (int i = 0; i < len; i++)
     {
       string sliceXpath = $"{scanXpath}/slice[{i + 1}]";
+      if (i == 0)
+      {
+        float.Parse(xmlDoc.SelectSingleNode($"{sliceXpath}/anglestep").InnerText);
+      }
+
       string elev = xmlDoc.SelectSingleNode($"{sliceXpath}/posangle").InnerText;
 
       string rayinfoXpath = $"{sliceXpath}/slicedata/rayinfo";
@@ -59,7 +64,7 @@ public class DecodeData
       float rawdataMax = float.Parse(xmlDoc.SelectSingleNode($"{rawdataXpath}/@max").Value.Replace('.', ','));
 
       float angle = DecodeBlob(rayinfoBlobid, rayinfoDepth)[0];
-      angle = NormalizeAngle(angle, rays, rayinfoDepth);
+      angle = NormalizeAngle(angle, rays, rayinfoDepth, 1);
       float[] rawdata = DecodeBlob(rawdataBlobid, rawdataDepth);
       rawdata = NormalizeRawdata(rawdata, rawdataDepth, rawdataMin, rawdataMax);
 
@@ -147,10 +152,10 @@ public class DecodeData
     return rawdata;
   }
 
-  float NormalizeAngle(float angle, float rays, int depth)
+  float NormalizeAngle(float angle, float rays, int depth, float res)
   {
     int divider = (depth == 8) ? EIGHT_BYTE_DIVIDER : SIXTEEN_BYTE_DIVIDER;
-    return (float)(angle * rays / divider);
+    return (float)(angle * rays / divider) * res;
   }
 }
 

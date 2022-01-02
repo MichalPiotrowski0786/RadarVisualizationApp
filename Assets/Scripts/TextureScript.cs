@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -94,7 +96,6 @@ public class TextureScript : MonoBehaviour
 
   void UpdateInfoText(int siteIndex)
   {
-    Debug.Log(siteIndex + "; " + ScanList.Count);
     string infoString = $"{ScanList[siteIndex].name}\n{ScanList[siteIndex].time}z\n{ScanList[siteIndex].date}";
     infoText.text = infoString;
   }
@@ -121,7 +122,7 @@ public class TextureScript : MonoBehaviour
     {
       string scanName = $"{site}/{scans[scans.Length - 1]}{dataName[i]}.vol";
       string scan = siteData.FetchScan(scanName);
-      //string localScan = File.ReadAllText(@"C:\Users\MichalPiotrowski\Downloads\2021082315135300V.vol", Encoding.GetEncoding("ISO-8859-1"));
+      //string scan = File.ReadAllText(@$"C:\Users\MichalPiotrowski\Desktop\Moje\ciekawostki_radarowe\2021062416234800{dataName[i]}.vol", Encoding.GetEncoding("ISO-8859-1"));
 
       DecodeData data = new DecodeData(scan);
       ScanList.Add(data.scan);

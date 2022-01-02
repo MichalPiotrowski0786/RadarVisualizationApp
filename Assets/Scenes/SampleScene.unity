@@ -922,8 +922,8 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 9750139a31354ce41a8b650e672760e3, type: 3}
   textureShader: {fileID: 7200000, guid: 1796d1fabc313734dae95583789dd768, type: 3}
   infoText: {fileID: 939600414}
-  maxValueText: {fileID: 451792040}
   minValueText: {fileID: 718737255}
+  maxValueText: {fileID: 451792040}
   sitesDropdown: {fileID: 1967312853}
   elevationsDropdown: {fileID: 1258967455}
   loadingSpinner: {fileID: 288820809}
@@ -4411,7 +4411,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2006552085}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 149.78053, y: 118.00375, z: -153.99156}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
