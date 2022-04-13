@@ -1,0 +1,50 @@
+Warszawa,21.02,52.12
+Kraków,19.57,50.03
+Łódź,19.28,51.47
+Wrocław,17.02,51.07
+Poznań,16.55,52.25
+Gdańsk,18.38,54.22
+Szczecin,14.34,53.26
+Bydgoszcz,18.00,53.07
+Lublin,22.34,51.14
+Białystok,23.10,53.08
+Katowice,19.00,50.15
+Gdynia,18.32,54.32
+Częstochowa,19.07,50.48
+Radom,21.10,51.24
+Rzeszów,22.01,50.03
+Toruń,18.37,53.02
+Sosnowiec,19.08,50.17
+Kielce,20.37,50.53
+Gliwice,18.40,50.17
+Olsztyn,20.30,53.47
+Zabrze,18.47,50.18
+Bielsko-Biała,19.04,49.50
+Bytom,18.54,50.23
+Zielona Góra,15.30,51.56
+Rybnik,18.33,50.05
+Ruda Śląska,18.52,50.16
+Opole,17.56,50.40
+Tychy,18.59,50.08
+Gorzów Wielkopolski,15.14,52.44
+Elbląg,19.24,54.10
+Płock,19.42,52.33
+Dąbrowa Górnicza,19.16,50.19
+Wałbrzych,16.17,50.47
+Włocławek,19.03,52.39
+Tarnów,21.00,50.02
+Chorzów,18.57,50.18
+Koszalin,16.11,54.11
+Kalisz,18.06,51.46
+Legnica,16.10,51.13
+Grudziądz,18.46,53.29
+Jaworzno,19.16,50.13
+Słupsk,17.02,54.28
+Jastrzębie-Zdrój,18.35,49.57
+Nowy Sącz,20.42,49.37
+Jelenia Góra,15.44,50.54
+Siedlce,22.17,52.11
+Mysłowice,19.08,50.14
+Piła,16.45,53.10
+Konin,18.16,52.13
+Piotrków Trybunalski,19.41,51.24
