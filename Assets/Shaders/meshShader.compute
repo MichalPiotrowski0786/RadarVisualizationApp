@@ -1,0 +1,23 @@
+#pragma kernel Main
+
+RWStructuredBuffer<float3> verts;
+RWStructuredBuffer<float2> uvs;
+
+int rays, bins;
+
+[numthreads(1,1,1)]
+void Main (uint3 id : SV_DispatchThreadID)
+{
+    for(int index = 0, i = 0; i < rays+1; i++){
+        for(int j = 0; j < bins+1; j++){
+            float theta = radians(i);
+            float x = cos(theta) * (j+1);
+            float z = sin(theta) * (j+1);
+
+            verts[index] = float3(x, 0, z);
+            uvs[index] = float2((float)i / rays, (float)j / bins);
+
+            index++;
+        }    
+    }
+}

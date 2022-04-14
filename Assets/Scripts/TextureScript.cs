@@ -105,7 +105,7 @@ public class TextureScript : MonoBehaviour
 
     void GetData(int siteIndex)
     {
-        string url = "ftp://daneradarowe.pl/";
+        string url = "daneradarowe.pl";
         SiteData siteData = new SiteData(url);
 
         string[] sites = siteData.FetchSiteList();

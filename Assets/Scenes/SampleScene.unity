@@ -889,6 +889,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   material: {fileID: 2100000, guid: f206c7cf182514f4ba10ff8a18ec87f4, type: 2}
   mesh: {fileID: 0}
+  cs: {fileID: 7200000, guid: 359ac4c8198950f4a9c262b9639e1daf, type: 3}
 --- !u!4 &461508004
 Transform:
   m_ObjectHideFlags: 0
