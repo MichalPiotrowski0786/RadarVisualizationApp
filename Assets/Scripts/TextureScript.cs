@@ -136,12 +136,6 @@ public class TextureScript : MonoBehaviour
                 string infoString = $"{data.scan.name}\n{data.scan.time}z\n{data.scan.date}";
                 //START_MAP DEBUG PART
                 var CityScript = new GetCitiesScript();
-                //Debug.Log(data.scan.lat + "; " + data.scan.lon + "; " + CityScript.cities[0].lat + "; " + CityScript.cities[0].lon);
-                Debug.Log(CityScript.GetDistance(data.scan.lon, data.scan.lat, CityScript.cities[1].lon, CityScript.cities[1].lat) / 1000);
-                // foreach (City city in CityScript.cities)
-                // {
-                //     Debug.Log(city.name);
-                // }
                 //END_MAP DEBUG PART
                 infoText.text = infoString;
             }
