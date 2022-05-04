@@ -97,9 +97,14 @@ public class TextureScript : MonoBehaviour
         }
     }
 
-    void UpdateInfoText(int siteIndex)
+    void UpdateInfoText(int scanIndex)
     {
-        string infoString = $"{ScanList[siteIndex].name}\n{ScanList[siteIndex].time}z\n{ScanList[siteIndex].date}";
+        string dataName = "";
+        if (scanIndex == 0) dataName = "Reflectivity";
+        else if (scanIndex == 1) dataName = "Velocity";
+        else dataName = "Correlation Coefficent";
+
+        string infoString = $"{dataName}\n{ScanList[scanIndex].name}\n{ScanList[scanIndex].time}z\n{ScanList[scanIndex].date}";
         infoText.text = infoString;
     }
 
@@ -133,11 +138,7 @@ public class TextureScript : MonoBehaviour
 
             if (i == 0)
             {
-                string infoString = $"{data.scan.name}\n{data.scan.time}z\n{data.scan.date}";
-                //START_MAP DEBUG PART
-                var CityScript = new GetCitiesScript();
-                //END_MAP DEBUG PART
-                infoText.text = infoString;
+                UpdateInfoText(i);
             }
 
             foreach (Slice slice in data.scan.ReturnSliceArr())
