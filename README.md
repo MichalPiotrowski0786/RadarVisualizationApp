@@ -8,10 +8,8 @@ Technologies used:
 | Technology | Link |
 | :---: | :---: |
 | IDE: VS Code | https://code.visualstudio.com |
-| Language 1: Javascript | https://developer.mozilla.org/pl/docs/Web/JavaScript |
-| Language 2: HTML | https://developer.mozilla.org/pl/docs/Learn/Getting_started_with_the_web/HTML_basics |
-| Main library: React | https://reactjs.org |
-| UI library: MUI(Material UI) | https://mui.com |
+| Main language: C# | https://docs.microsoft.com/en-us/dotnet/csharp/ |
+| Graphics/Shaders language: HLSL | https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl |
 
 
 
