@@ -61,7 +61,10 @@ public class TextureScript : MonoBehaviour
         if (buttons.Length > 0)
         {
             foreach (Button b in buttons) b.interactable = false;
+
             UpdateColormapElement(datatype);
+            UpdateInfoText(datatype);
+
             for (int i = 0; i < siteDatatypes; i++)
             {
                 int x = i; // lol
@@ -135,11 +138,6 @@ public class TextureScript : MonoBehaviour
             DecodeData data = new DecodeData(scan);
             ScanList.Add(data.scan);
             elevations = data.len;
-
-            if (i == 0)
-            {
-                UpdateInfoText(i);
-            }
 
             foreach (Slice slice in data.scan.ReturnSliceArr())
             {
