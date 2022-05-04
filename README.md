@@ -17,10 +17,6 @@ Functional requirements:
 
 | Id | Category | Name | Description | Urgent?(Y/N) | Done?(Y/N) |
 | :---: | :---: | :---: | :---: | :---: | :---: |
-| FR1 | Function | Add employee | Add employee to the database | Y | Y |
-| FR2 | Function | Delete employee | Delete employee from database | Y | Y |
-| FR3 | Function | Update employee | Update employee data in database | Y | N |
-| FR4 | Function | Display employees list | Display list of employees based on database/array  | Y | Y |
-| FR5 | Graphic | UI/Frontend | Make user interface allowing to communicate with backend(database) | Y | Y |
-| FR6 | Testing | Test software | Make manual/unit test to catch errors/bugs/leaks | N | N |
-| FR6 | Validation | Prevent from nulls | Prevent user from inserting empty/null values into database | N | Y |
+| FR1 | Function | Decode raw data | Make class and methods to decode raw data | Y | Y |
+| FR1 | Function | Map values | Map values from data to appropriate number | Y | Y |
+| FR1 | Function | Visualize data | Make obejcts, classes and shaders to visualize data using colormap | Y | Y |
