@@ -1,5 +1,5 @@
 # Weather Radar Data Visualization App
-## Web/Desktop app with main purpose of visualizing raw data from weather radars
+## Unity application related to visualizing weather radars data using Compute Shaders
 
 
 
